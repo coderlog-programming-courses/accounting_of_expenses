@@ -1,24 +1,38 @@
 import PySimpleGUI as sg
-import random
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-numbs = [12,56,100,200,5]
-mcolors = ['blue','pink','red','green','black']
-mylabels = ['education and culture','food','health and spents','taxes','entertainment']
-def create_pie_graph(numbs):
-    plt.figure(figsize =(7,5)) # graph size
-    plt.pie(numbs)
-    plt.legend(labels =mylabels,loc='upper right')
-    plt.title('expenses',fontsize=50)
-    
+import matplotlib
+matplotlib.use('TkAgg')
+import numpy as np
+
+err_txt = ''
+category = ['education and culture','food','health and spents','taxes','entertaitment','other']
+x = [0,0,0,0,0,0]
+mcolors = ['brown','black','red','green','pink','purple']
+mylabels = category
+def create_pie_graph(x):
+    plt.figure(figsize =(3, 3))
+    plt.pie(x)
+    #plt.legend(labels=category,loc='upper right',prop={'size': 8})
+    plt.legend(mylabels, bbox_to_anchor=(1,0), loc="lower right",bbox_transform=plt.gcf().transFigure)
+    plt.title('expenses', fontsize=14)
     
     return plt.gcf()
 
-layout = [
-    [sg.Canvas(size=(100,100), key='-CANVAS-')]
+layout_l = [
+	[sg.Text(err_txt,key='err')],
+    [sg.Input(s=9,key=('inp')),sg.Combo(category, s=(15,22), enable_events=True, readonly=True, k='-COMBO-'),sg.Button('add',s=5,key="butt")],
+    [sg.Exit()]
     ]
 
+layout_r = [
+    [],
+    [sg.Canvas(key='-CANVAS-')]
+    ]
 
+layout = [
+    [sg.Col(layout_l), sg.Col(layout_r)],
+    ]
 
 def draw_figure(canvas, figure):
     figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
@@ -27,13 +41,43 @@ def draw_figure(canvas, figure):
     return figure_canvas_agg
 
 
-window = sg.Window('window name', layout, finalize=True, element_justification='center')
-
-draw_figure(window['-CANVAS-'].TKCanvas, create_pie_graph(numbs))
+window = sg.Window('PySimpleGUI + MatPlotLib Bar Graphs', layout, finalize=True, element_justification='upper right')
 
 while True:
     event, values = window.read()
+    print(event)
     if event == sg.WIN_CLOSED or event == 'Exit':
         break
-        
+    
+    elif event == "butt":
+        not_none = True
+        not_letter = True
+        category_not_none = True
+
+        categor = values["-COMBO-"]
+        txt = values["inp"]
+        if txt == '':
+            err_txt = "input money" 
+            not_none = False
+            window['err'].update(err_txt)
+        else:
+            try:
+                inp_val = int(txt)
+            except:
+                err_txt = "input number, not letters"
+                not_letter = False
+                window['err'].update(err_txt)
+        if categor == '':
+            err_txt = "choose the category"
+            category_not_none = False	
+            window['err'].update(err_txt)
+
+        elif not_none == True and not_letter == True and category_not_none ==True:
+            for categ in category:
+                if categ == categor:
+                    x[category.index(categ)] = inp_val
+            
+            
+            draw_figure(window['-CANVAS-'].TKCanvas, create_pie_graph(x)) 
+        	
 window.close()

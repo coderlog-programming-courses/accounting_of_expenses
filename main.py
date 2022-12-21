@@ -4,7 +4,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib
 matplotlib.use('TkAgg')
 import numpy as np
-
+all_sum = ''
+biggest_exp = ''
 err_txt = ''
 category = ['education and culture','food','health and spents','taxes','entertaitment','other']
 x = [0,0,0,0,0,0]
@@ -19,15 +20,22 @@ def create_pie_graph(x):
     
     return plt.gcf()
 
+def delete_fig_agg(fig_agg):
+    fig_agg.get_tk_widget().forget()
+    plt.close('all')
+
 layout_l = [
-	[sg.Text(err_txt,key='err')],
+    [sg.Text(err_txt,text_color="red",key='err')],
     [sg.Input(s=9,key=('inp')),sg.Combo(category, s=(15,22), enable_events=True, readonly=True, k='-COMBO-'),sg.Button('add',s=5,key="butt")],
+    [sg.Text("  Result")],
+    [sg.Text("the biggest expenses:")],
+    [sg.Text(biggest_exp,key = 'biggest')],
+    [sg.Text(all_sum,key = 'sum')],
     [sg.Exit()]
     ]
 
 layout_r = [
-    [],
-    [sg.Canvas(key='-CANVAS-')]
+    [sg.Canvas(key='-CANVAS-')],
     ]
 
 layout = [
@@ -41,8 +49,9 @@ def draw_figure(canvas, figure):
     return figure_canvas_agg
 
 
-window = sg.Window('PySimpleGUI + MatPlotLib Bar Graphs', layout, finalize=True, element_justification='upper right')
+window = sg.Window('account', layout, finalize=True, element_justification='upper right')
 
+fig_agg = None
 while True:
     event, values = window.read()
     print(event)
@@ -53,6 +62,7 @@ while True:
         not_none = True
         not_letter = True
         category_not_none = True
+        not_minus = True
 
         categor = values["-COMBO-"]
         txt = values["inp"]
@@ -63,21 +73,30 @@ while True:
         else:
             try:
                 inp_val = int(txt)
+                if inp_val<0:
+                    not_minus = False
+                    err_txt = "less than zero"
+                    window['err'].update(err_txt)
             except:
                 err_txt = "input number, not letters"
                 not_letter = False
                 window['err'].update(err_txt)
         if categor == '':
             err_txt = "choose the category"
-            category_not_none = False	
+            category_not_none = False   
             window['err'].update(err_txt)
 
-        elif not_none == True and not_letter == True and category_not_none ==True:
+        elif not_none == True and not_letter == True and category_not_none ==True and not_minus == True:
             for categ in category:
                 if categ == categor:
-                    x[category.index(categ)] = inp_val
+                    x[category.index(categ)] = x[category.index(categ)]+inp_val
+                    all_sum = 'all expenses: '+str(sum(x))
+                    window['sum'].update(all_sum)
+                    biggest_exp = category[x.index(max(x))]+" | "+str(max(x))
+                    window['biggest'].update(biggest_exp)
+
+            if fig_agg is not None:
+                delete_fig_agg(fig_agg)
+            fig_agg = draw_figure(window['-CANVAS-'].TKCanvas, create_pie_graph(x))
             
-            
-            draw_figure(window['-CANVAS-'].TKCanvas, create_pie_graph(x)) 
-        	
 window.close()

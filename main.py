@@ -4,6 +4,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib
 matplotlib.use('TkAgg')
 import numpy as np
+tx = []
 all_sum = ''
 biggest_exp = ''
 err_txt = ''
@@ -11,6 +12,12 @@ category = ['education and culture','food','health and spents','taxes','entertai
 x = [0,0,0,0,0,0]
 mcolors = ['brown','black','red','green','pink','purple']
 mylabels = category
+
+def minim(x):
+    for num in x:
+        if num != 0:
+            tx.append(num)
+
 def create_pie_graph(x):
     plt.figure(figsize =(3, 3))
     plt.pie(x)
@@ -30,6 +37,8 @@ layout_l = [
     [sg.Text("  Result")],
     [sg.Text("the biggest expenses:")],
     [sg.Text(biggest_exp,key = 'biggest')],
+    [sg.Text("the lowest expenses:")],
+    [sg.Text(biggest_exp,key = 'lowest')],
     [sg.Text(all_sum,key = 'sum')],
     [sg.Exit()]
     ]
@@ -92,8 +101,11 @@ while True:
                     x[category.index(categ)] = x[category.index(categ)]+inp_val
                     all_sum = 'all expenses: '+str(sum(x))
                     window['sum'].update(all_sum)
+                    minim(x)
+                    lowest_exp = category[x.index(min(x))]+" | "+str(min(tx))
                     biggest_exp = category[x.index(max(x))]+" | "+str(max(x))
                     window['biggest'].update(biggest_exp)
+                    window['lowest'].update(lowest_exp)
 
             if fig_agg is not None:
                 delete_fig_agg(fig_agg)

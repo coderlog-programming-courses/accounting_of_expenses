@@ -20,7 +20,7 @@ def minim(x):
 
 def create_pie_graph(x):
     plt.figure(figsize =(3, 3))
-    plt.pie(x)
+    plt.pie(x,colors=mcolors)
     #plt.legend(labels=category,loc='upper right',prop={'size': 8})
     plt.legend(mylabels, bbox_to_anchor=(1,0), loc="lower right",bbox_transform=plt.gcf().transFigure)
     plt.title('expenses', fontsize=14)

@@ -24,7 +24,8 @@ def verify_username(username):
     return False
 
 while True:
-    event, values = password_window.read()
+    event = password_window.read()
+    values = password_window.read()
     if event == 'Exit' or event == sg.WIN_CLOSED:
         exit()
     elif event == "Submit":
